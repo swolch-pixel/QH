@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quarterly Qualified Hours (QH) Calculator</title>
+
+<style>
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f3f6f9;
+    margin: 0;
+    padding: 30px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+header {
+    background: #003a8f;
+    color: #ffffff;
+    padding: 20px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+header div {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-top: 4px;
+}
+
+section {
+    padding: 24px 30px;
+}
+
+label {
+    font-weight: 600;
+    display: block;
+    margin-top: 15px;
+}
+
+input, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    border-radius: 5px;
+    border: 1px solid #bbb;
+}
+
+.row {
+    display: flex;
+    gap: 16px;
+}
+
+.row div {
+    flex: 1;
+}
+
+.results {
+    background: #eef3fb;
+    border-left: 6px solid #003a8f;
+    padding: 18px;
+    border-radius: 6px;
+    margin-top: 25px;
+}
+
+.results p {
+    margin: 6px 0;
+    font-weight: 600;
+}
+
+.actions {
+    margin-top: 22px;
+    display: flex;
+    justify-content: center; /* CENTERED */
+}
+
+button {
+    padding: 10px 22px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    background: #003a8f;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #002e6f;
+}
+
+footer {
+    font-size: 12px;
+    font-style: italic;
+    color: #555;
+    text-align: center;
+    padding: 18px;
+    border-top: 1px solid #ddd;
+}
+
+a {
+    font-size: 12px;
+    margin-left: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <h1>Quarterly Qualified Hours (QH) Calculator</h1>
+    <div id="quarterInfo"></div>
+</header>
+
+<section>
+
+<label>Quarter</label>
+<select id="quarterSelect">
+    <option value="0">Q1 (Jan–Mar)</option>
+    <option value="1">Q2 (Apr–Jun)</option>
+    <option value="2">Q3 (Jul–Sep)</option>
+    <option value="3">Q4 (Oct–Dec)</option>
+</select>
+
+<label>Years of Service (YOS)</label>
+<select id="yos">
+    <option value="lt10">Less than 10 years</option>
+    <option value="10to14">10–14 years</option>
+    <option value="15to19">15–19 years</option>
+    <option value="20plus">20+ years</option>
+</select>
+
+<label>Employment Status</label>
+<select id="status">
+    <option value="FT">Full‑Time</option>
+    <option value="PT">Part‑Time</option>
+</select>
+
+<label>
+    Total Days Missed Due to Leave
+    <a href="https://www.skywestonline.com/SKYW/SkedPlus/MySchedule.aspx" target="_blank">SkedPlus+</a>
+</label>
+<input type="number" id="daysMissed" min="0">
+
+<label>
+    Processed Credit
+    <a href="https://www.skywestonline.com/SKYW/CrewMisc/CrewPayReport.aspx" target="_blank">Crew Pay</a>
+</label>
+
+<div class="row">
+    <div>
+        <label id="m1Label"></label>
+        <input type="text" id="m1" placeholder="hh:mm">
+    </div>
+    <div>
+        <label id="m2Label"></label>
+        <input type="text" id="m2" placeholder="hh:mm">
+    </div>
+    <div>
+        <label id="m3Label"></label>
+        <input type="text" id="m3" placeholder="hh:mm">
+    </div>
+</div>
+
+<div class="results">
+    <p>Base QH Requirement: <span id="baseQH"></span></p>
+    <p>Total Days in Quarter: <span id="quarterDays"></span></p>
+    <p>Adjusted QH Requirement: <span id="adjustedQH"></span></p>
+    <p>Total Processed Credit: <span id="totalCredit"></span></p>
+    <p>Hours Still Needed: <span id="hoursNeeded"></span></p>
+</div>
+
+<div class="actions">
+    <button type="button" onclick="resetForm()">Reset</button>
+</div>
+
+</section>
+
+<footer>
+This calculator is provided for reference only. Flight attendants should always defer to official company records and applicable policies.
+</footer>
+
+</div>
+
+<script>
+const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+function daysInMonth(m, y) {
+    return new Date(y, m + 1, 0).getDate();
+}
+
+function decimalToHHMM(decimal) {
+    const hrs = Math.floor(decimal);
+    const mins = Math.round((decimal - hrs) * 60);
+    return `${hrs}:${mins.toString().padStart(2, "0")}`;
+}
+
+function hhmmToDecimal(value) {
+    if (!value || !value.includes(":")) return 0;
+    const [h, m] = value.split(":").map(Number);
+    if (isNaN(h) || isNaN(m)) return 0;
+    return h + m / 60;
+}
+
+function setDefaultQuarter() {
+    const q = Math.floor(new Date().getMonth() / 3);
+    document.getElementById("quarterSelect").value = q;
+}
+
+function setupQuarter() {
+    const year = new Date().getFullYear();
+    const q = Number(document.getElementById("quarterSelect").value);
+    const start = q * 3;
+
+    document.getElementById("m1Label").textContent = monthNames[start];
+    document.getElementById("m2Label").textContent = monthNames[start + 1];
+    document.getElementById("m3Label").textContent = monthNames[start + 2];
+
+    const days =
+        daysInMonth(start, year) +
+        daysInMonth(start + 1, year) +
+        daysInMonth(start + 2, year);
+
+    document.getElementById("quarterDays").textContent = days;
+    document.getElementById("quarterInfo").textContent = `Q${q + 1} ${year}`;
+
+    return days;
+}
+
+function calculate() {
+    const yos = document.getElementById("yos").value;
+    const status = document.getElementById("status").value;
+    const daysMissed = Number(document.getElementById("daysMissed").value);
+
+    const credit =
+        hhmmToDecimal(m1.value) +
+        hhmmToDecimal(m2.value) +
+        hhmmToDecimal(m3.value);
+
+    let base = 0;
+    if (yos === "lt10") base = status === "FT" ? 150 : 75;
+    if (yos === "10to14") base = status === "FT" ? 100 : 50;
+    if (yos === "15to19") base = status === "FT" ? 75 : 37.5;
+    if (yos === "20plus") base = status === "FT" ? 50 : 25;
+
+    const qDays = setupQuarter();
+    const adjusted = base * (1 - Math.min(daysMissed / qDays, 1));
+    const needed = Math.max(adjusted - credit, 0);
+
+    baseQH.textContent = decimalToHHMM(base);
+    adjustedQH.textContent = decimalToHHMM(adjusted);
+    totalCredit.textContent = decimalToHHMM(credit);
+    hoursNeeded.textContent = decimalToHHMM(needed);
+}
+
+function resetForm() {
+    document.querySelectorAll("input").forEach(i => i.value = "");
+    yos.value = "lt10";
+    status.value = "FT";
+    setDefaultQuarter();
+    calculate();
+}
+
+setDefaultQuarter();
+calculate();
+document.querySelectorAll("input, select").forEach(e => e.addEventListener("input", calculate));
+</script>
+
+</body>
+</html>
