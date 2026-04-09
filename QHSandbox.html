@@ -511,7 +511,7 @@ const quarterMatch = quarterText.match(/Q([1-4])\s+(\d{4})/);
 const qPart = quarterMatch ? `Q${quarterMatch[1]}` : "QX";
 const yearPart = quarterMatch ? quarterMatch[2] : "20XX";
 
-const fileName = `${empNum} ${faName} ${qPart} ${yearPart}.txt';
+const fileName = `${empNum} ${faName} ${qPart} ${yearPart}.txt`;
 
   const blob = new Blob([content], { type: "text/plain" });
   const url = URL.createObjectURL(blob);
@@ -542,7 +542,7 @@ function saveQH() {
   const yearPart = match ? match[2] : "20XX";
 
   // Filename format you requested earlier: (emp#) (name) Q(x) 20(xx)
-  const fileName = `${empNum} ${faNameSafe} ${qPart} ${yearPart}.txt';
+  const fileName = `${empNum} ${faNameSafe} ${qPart} ${yearPart}.txt`;
 
   // "Calculated By" value (who processed it)
   const processedBy = document.getElementById("calculatedBy")?.value || "";
