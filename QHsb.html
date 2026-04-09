@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ISC/InFlight LOA Quarterly Hours (QH) Calculator</title>
+
+<style>
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f3f6f9;
+    margin: 0;
+    padding: 30px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+header {
+    background: #003a8f;
+    color: #ffffff;
+    padding: 20px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+header div {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-top: 4px;
+}
+
+section {
+    padding: 24px 30px;
+}
+
+label {
+    font-weight: 600;
+    display: block;
+    margin-top: 15px;
+}
+
+input, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    border-radius: 5px;
+    border: 1px solid #bbb;
+}
+
+.row {
+    display: flex;
+    gap: 50px;
+    min-width: 0;
+}
+
+.row div {
+    flex: 1;
+}
+
+
+.results {
+    background: #eef3fb;
+    border-left: 6px solid #003a8f;
+    padding: 18px;
+    border-radius: 6px;
+    margin-top: 25px;
+}
+
+.results p {
+    margin: 6px 0;
+    font-weight: 600;
+}
+
+.actions {
+    margin-top: 22px;
+    display: flex;
+    justify-content: center; /* CENTERED */
+}
+
+button {
+    padding: 10px 22px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    background: #003a8f;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #002e6f;
+}
+
+footer {
+    font-size: 12px;
+    font-style: italic;
+    color: #555;
+    text-align: center;
+    padding: 18px;
+    border-top: 1px solid #ddd;
+}
+
+a {
+    font-size: 12px;
+    margin-left: 6px;
+}
+
+.month-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.month-row label {
+  display: inline-block;   /* ← THIS is the fix */
+  width: 90px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.month-row input {
+  flex: 1;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.flex-spacer {
+  flex: 1;
+}
+
+email-preview {
+  margin-top: 24px;
+}
+
+.email-preview textarea {
+  width: 100%;
+  resize: vertical;
+  font-family: "Segoe UI", Arial, sans-serif;
+  line-height: 1.4;
+}
+
+
+.email-draft {
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  padding: 12px;
+  background: #fafafa;
+  font-family: "Segoe UI", Arial, sans-serif;
+  line-height: 1.5;
+  white-space: normal;
+}
+
+.email-draft a {
+  color: #003a8f;
+  text-decoration: underline;
+}
+
+.email-draft ul {
+  margin-left: 20px;
+}
+
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <h1>ISC/InFlight LOA Quarterly Hours (QH) Calculator</h1>
+    <div id="quarterInfo"></div>
+</header>
+
+<section>
+
+<div class="row">
+  <div>
+    <label for="faName">Flight Attendant Name</label>
+    <input type="text" id="faName">
+  </div>
+  <div>
+    <label for="employeeNumber">Employee Number</label>
+    <input type="text" id="employeeNumber">
+  </div>
+</div>
+
+<div class="row">
+  <div>
+    <label for="calculatedBy">Calculated By</label>
+    <select id="calculatedBy">
+      <option value="">-- Select --</option>
+      <option>Kylie</option><option>Shawna</option><option>Heather</option>
+      <option>Kara</option><option>Candice</option><option>Amber</option>
+      <option>Kylee</option><option>Meagan</option><option>Faith</option>
+      <option>Abigail</option><option>Erin</option><option>Diane</option>
+      <option>Cody</option><option>Heidi</option><option>Valerie</option>
+      <option>Alise</option><option>Christy</option><option>Courtney</option>
+      <option>Chelsea H.</option><option>Xochitl</option><option>Carol</option>
+      <option>Kristen</option><option>Ashley</option><option>Jade</option>
+      <option>Crissy</option><option>Ginger</option><option>Taylor</option>
+      <option>Billy</option><option>Jazmin</option><option>Amanda</option>
+      <option>Jamelia</option><option>Chelsea B.</option><option>Bryn</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Quarter</label>
+    <select id="quarterSelect">
+      <option value="0">Q1 (Jan–Mar)</option>
+      <option value="1">Q2 (Apr–Jun)</option>
+      <option value="2">Q3 (Jul–Sep)</option>
+      <option value="3">Q4 (Oct–Dec)</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Years of Service (YOS)</label>
+    <select id="yos">
+      <option value="lt10">Less than 10 years</option>
+      <option value="10to14">10–14 years</option>
+      <option value="15to19">15–19 years</option>
+      <option value="20plus">20+ years</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Employment Status</label>
+    <select id="status">
+      <option value="FT">Full‑Time</option>
+      <option value="PT">Part‑Time</option>
+    </select>
+  </div>
+</div>
+
+<div class="row">
+  <!-- LEFT COLUMN -->
+  
+<div>
+  <label>
+    Processed Credit
+    <a href="https://www.skywestonline.com/SKYW/CrewMisc/CrewPayReport.aspx" target="_blank">Crew Pay</a>
+  </label>
+
+  <div class="month-stack">
+    <div class="month-row">
+      <label id="m1Label"></label>
+      <input type="text" id="m1" placeholder="hh:mm">
+    </div>
+
+    <div class="month-row">
+      <label id="m2Label"></label>
+      <input type="text" id="m2" placeholder="hh:mm">
+    </div>
+
+    <div class="month-row">
+      <label id="m3Label"></label>
+      <input type="text" id="m3" placeholder="hh:mm">
+    </div>
+  </div>
+</div>
+
+
+  
+<div class="right-column">
+  <div>
+    <label>
+      Total Days Missed Due to Leave
+      <a href="https://www.skywestonline.com/SKYW/SkedPlus/MySchedule.aspx" target="_blank">SkedPlus+</a>
+    </label>
+    <input type="number" id="daysMissed" min="0">
+  </div>
+
+  <div class="align-bottom">
+    <label for="lastCrewPayDate">Last Date Crew Pay Processed</label>
+    <input type="date" id="lastCrewPayDate">
+  </div>
+</div>
+
+</div>
+
+<div class="results">
+    <p>Base QH Requirement: <span id="baseQH"></span></p>
+    <p>Total Days in Quarter: <span id="quarterDays"></span></p>
+    <p>Adjusted QH Requirement: <span id="adjustedQH"></span></p>
+    <p>Total Processed Credit: <span id="totalCredit"></span></p>
+    <p>Hours Still Needed: <span id="hoursNeeded"></span></p>
+</div>
+
+<div class="email-preview">
+  <label>Email Draft (Copy & Paste)</label>
+  <div id="emailDraft" class="email-draft" contenteditable="false"></div>
+</div>
+
+<div class="row">
+<div class="actions">
+ <button type="button" onclick="saveQH()">
+  Save
+ </button>
+</div>
+
+
+<div class="actions">
+    <button type="button" onclick="resetForm()">Reset</button>
+</div>
+</div>
+
+</section>
+
+<footer>
+This calculator is provided for reference only. Flight attendants should always defer to official company records and applicable policies.
+</footer>
+
+</div>
+
+<script>
+const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+function daysInMonth(m, y) {
+    return new Date(y, m + 1, 0).getDate();
+}
+
+function decimalToHHMM(decimal) {
+    const hrs = Math.floor(decimal);
+    const mins = Math.round((decimal - hrs) * 60);
+    return `${hrs}:${mins.toString().padStart(2, "0")}`;
+}
+
+function hhmmToDecimal(value) {
+    if (!value || !value.includes(":")) return 0;
+    const [h, m] = value.split(":").map(Number);
+    if (isNaN(h) || isNaN(m)) return 0;
+    return h + m / 60;
+}
+
+function setDefaultQuarter() {
+    const q = Math.floor(new Date().getMonth() / 3);
+    document.getElementById("quarterSelect").value = q;
+}
+
+function setupQuarter() {
+    const year = new Date().getFullYear();
+    const q = Number(document.getElementById("quarterSelect").value);
+    const start = q * 3;
+
+    document.getElementById("m1Label").textContent = monthNames[start];
+    document.getElementById("m2Label").textContent = monthNames[start + 1];
+    document.getElementById("m3Label").textContent = monthNames[start + 2];
+
+    const days =
+        daysInMonth(start, year) +
+        daysInMonth(start + 1, year) +
+        daysInMonth(start + 2, year);
+
+    document.getElementById("quarterDays").textContent = days;
+    document.getElementById("quarterInfo").textContent = `Q${q + 1} ${year}`;
+
+    return days;
+}
+
+function calculate() {
+    const yos = document.getElementById("yos").value;
+    const status = document.getElementById("status").value;
+    const daysMissed = Number(document.getElementById("daysMissed").value);
+
+    const credit =
+        hhmmToDecimal(m1.value) +
+        hhmmToDecimal(m2.value) +
+        hhmmToDecimal(m3.value);
+
+    let base = 0;
+    if (yos === "lt10") base = status === "FT" ? 150 : 75;
+    if (yos === "10to14") base = status === "FT" ? 100 : 50;
+    if (yos === "15to19") base = status === "FT" ? 75 : 37.5;
+    if (yos === "20plus") base = status === "FT" ? 50 : 25;
+
+    const qDays = setupQuarter();
+    const adjusted = base * (1 - Math.min(daysMissed / qDays, 1));
+    const needed = Math.max(adjusted - credit, 0);
+
+    baseQH.textContent = decimalToHHMM(base);
+    adjustedQH.textContent = decimalToHHMM(adjusted);
+    totalCredit.textContent = decimalToHHMM(credit);
+    hoursNeeded.textContent = decimalToHHMM(needed);
+}
+
+function resetForm() {
+    document.querySelectorAll("input").forEach(i => i.value = "");
+    yos.value = "lt10";
+    status.value = "FT";
+    setDefaultQuarter();
+    calculate();
+}
+
+function generateEmail() {
+  const faName = document.getElementById("faName").value || "Flight Attendant";
+  const qText = document.getElementById("quarterInfo").textContent;
+  const today = new Date().toLocaleDateString();
+
+  const m1 = document.getElementById("m1Label").textContent;
+  const m2 = document.getElementById("m2Label").textContent;
+  const m3 = document.getElementById("m3Label").textContent;
+
+  const m1Val = document.getElementById("m1").value || "0:00";
+  const m2Val = document.getElementById("m2").value || "0:00";
+  const m3Val = document.getElementById("m3").value || "0:00";
+
+  const totalCredit = document.getElementById("totalCredit").textContent;
+  const adjustedQH = document.getElementById("adjustedQH").textContent;
+  const hoursNeeded = document.getElementById("hoursNeeded").textContent;
+  const daysMissed = document.getElementById("daysMissed").value || 0;
+
+ const email = `
+<p>Hello ${faName},</p>
+
+<p>
+Thank you for contacting the <strong>InFlight Support Center</strong> regarding your Quarterly Hours.
+Below is a recap of your hour requirement for this quarter.
+</p>
+
+<p><strong>Quarter:</strong> ${qText}</p>
+
+<p><strong>Your credit hours processed as of today:</strong></p>
+
+<ul>
+  <li>${m1}: ${m1Val}</li>
+  <li>${m2}: ${m2Val}</li>
+  <li>${m3}: ${m3Val}</li>
+</ul>
+
+<p>
+<strong>Total Hours Processed as of ${today}:</strong> ${totalCredit}
+</p>
+
+<p>
+Your total time missed due to LOA, BVNP, JURY, or OJI is <strong>${daysMissed}</strong> day(s).
+You are not required to make up these hours.
+</p>
+
+<p>
+<strong>Your adjusted hour requirement:</strong> ${adjustedQH}
+</p>
+
+<p>
+<strong>Additional hours needed by the end of the quarter:</strong> ${hoursNeeded}
+</p>
+
+<p>
+Your Processed Credit is available in
+<a href="https://www.skywestonline.com/SKYW/SkedPlus/MySchedule.aspx" target="_blank">SkedPlus+</a>
+under the
+<a href="https://www.skywestonline.com/SKYW/CrewMisc/CrewPayReport.aspx" target="_blank">Crew Pay</a> tab.
+</p>
+
+<p>
+For policy reference: Flight Attendant Policy Manual &gt <a href="https://www.skywestonline.com/menudocs/+if.manuals/flight%20attendant%20policy%20manual/sp2316.pdf"><strong>SP2316 Hours of Service</strong></a>
+</p>
+
+<p>
+If you have any additional questions, feel free to reach out.
+</p>
+
+`;
+``
+
+  document.getElementById("emailDraft").innerHTML = email;
+}
+
+setDefaultQuarter();
+calculate();
+document.querySelectorAll("input, select").forEach(e =>
+  e.addEventListener("input", () => {
+    calculate();
+    generateEmail();
+  })
+);
+
+
+function downloadQHFile() {
+  const content = document.getElementById("emailDraft").innerText;
+
+const empNum =
+  document.getElementById("employeeNumber").value
+    ?.replace(/[^0-9]/g, "")
+    || "EMP";
+
+const faName =
+  document.getElementById("faName").value
+    ?.trim()
+    || "Name";
+
+const quarterText = document.getElementById("quarterInfo").textContent;
+
+// Expected format: "Q2 2026"
+const quarterMatch = quarterText.match(/Q([1-4])\s+(\d{4})/);
+
+const qPart = quarterMatch ? `Q${quarterMatch[1]}` : "QX";
+const yearPart = quarterMatch ? quarterMatch[2] : "20XX";
+
+const fileName = `${empNum} ${faName} ${qPart} ${yearPart}`;
+
+  const blob = new Blob([content], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function saveQH() {
+  // Always prove the click happened
+  console.log("Save clicked");
+
+  // ✅ Put your real Power Automate HTTP POST URL here
+  const flowUrl = "https://default68df407bf1354b2485af281788b2cf.b9.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/745cf9192264460fb211671c85a5b22a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=jaCsLTax2_aOLqjBGGxbLf0TjP9RPlI3f8Zwy2zGiuI";
+
+  // ----- Gather values from the form -----
+  const empNum = (document.getElementById("employeeNumber")?.value || "").replace(/[^0-9]/g, "") || "EMP";
+  const faNameRaw = (document.getElementById("faName")?.value || "").trim() || "Name";
+  const faNameSafe = faNameRaw.replace(/\s+/g, "_");
+
+  const quarterText = document.getElementById("quarterInfo")?.textContent || ""; // e.g. "Q2 2026"
+  const match = quarterText.match(/Q([1-4])\s+(\d{4})/);
+  const qPart = match ? `Q${match[1]}` : "QX";
+  const yearPart = match ? match[2] : "20XX";
+
+  // Filename format you requested earlier: (emp#) (name) Q(x) 20(xx)
+  const fileName = `${empNum} ${faNameSafe} ${qPart} ${yearPart}`;
+
+  // "Calculated By" value (who processed it)
+  const processedBy = document.getElementById("calculatedBy")?.value || "";
+
+  // Email text (the version to send to the FA) — keep this CLEAN
+  // emailDraft is a DIV in your newer version, so use innerText.
+  const emailText = document.getElementById("emailDraft")?.innerText || "";
+
+  // ----- Build FILE content (adds header NOT shown in email) -----
+  const now = new Date();
+  const header =
+    `Processed By: ${processedBy || "Not specified"}\n` +
+    `Processed On: ${now.toLocaleString()}\n` +
+    `Employee #: ${empNum}\n` +
+    `FA Name: ${faNameRaw}\n` +
+    `Quarter: ${quarterText}\n` +
+    `----------------------------------------\n\n`;
+
+  const fileContent = header + emailText;
+
+  // ✅ Define payload (this is what you were missing)
+  const payload = {
+    fileName: fileName,
+    content: fileContent,       // what gets saved to SharePoint
+    processedBy: processedBy    // what gets written into SharePoint column
+  };
+
+  // Optional: show a status line if you have one
+  const statusEl = document.getElementById("saveStatus");
+  if (statusEl) statusEl.textContent = "Saving…";
+
+  // ----- Send to Power Automate -----
+  fetch(flowUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(async (response) => {
+    const text = await response.text(); // force resolution
+    if (!response.ok) throw new Error(text || `HTTP ${response.status}`);
+    return text;
+  })
+  .then(() => {
+    if (statusEl) statusEl.textContent = `Saved: ${fileName}`;
+    alert("Saved successfully to SharePoint.");
+  })
+  .catch((err) => {
+    console.error("Save failed:", err);
+    if (statusEl) statusEl.textContent = "Save failed (see console / run history).";
+    alert("Save failed — check Power Automate run history.");
+  });
+}
+
+</script>
+
+</body>
+</html>
