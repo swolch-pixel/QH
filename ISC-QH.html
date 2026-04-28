@@ -380,7 +380,9 @@ function calculate() {
     if (yos === "20plus") base = status === "FT" ? 50 : 25;
 
     const qDays = setupQuarter();
-    const adjusted = base * (1 - Math.min(daysMissed / qDays, 1));
+    const rawPct = daysMissed / qDays;
+    const roundedPct = Math.round(rawPct * 100) / 100;
+    const adjusted = base * (1 - Math.min(roundedPct, 1));
     const needed = Math.max(adjusted - credit, 0);
 
     baseQH.textContent = decimalToHHMM(base);
