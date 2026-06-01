@@ -582,7 +582,7 @@ const fullName = document.getElementById("faName").value.trim() || "Flight Atten
 
 // Split into parts
 const nameParts = fullName.split(" ");
-const firstName = nameParts[0] || "Flight";
+const firstName = nameParts[0] || "Flight Attendant";
 const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
 
 // Rebuild full formatted name (handles single-name case)
