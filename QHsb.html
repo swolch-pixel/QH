@@ -644,6 +644,16 @@ function saveQH() {
   });
 }
 
+setDefaultQuarter();
+calculate();
+
+document.querySelectorAll("input, select").forEach(e =>
+  e.addEventListener("input", () => {
+    calculate();
+    generateEmail();
+  })
+);
+
 </script>
 
 </body>
