@@ -296,6 +296,8 @@ email-preview {
 <div class="results">
     <p>Base QH Requirement: <span id="baseQH"></span></p>
     <p>Total Days in Quarter: <span id="quarterDays"></span></p>
+    <p>Percentage of Days Missed: <span id="missedPct"></span></p>
+    <p>Total Credit Missed Due to Leave: <span id="creditMissed"></span></p
     <p>Adjusted QH Requirement: <span id="adjustedQH"></span></p>
     <p>Total Processed Credit: <span id="totalCredit"></span></p>
     <p>Hours Still Needed: <span id="hoursNeeded"></span></p>
@@ -389,13 +391,32 @@ function calculate() {
     if (yos === "20plus") base = status === "FT" ? 50 : 25;
 
     const qDays = setupQuarter();
-    const adjusted = base * (1 - Math.min(daysMissed / qDays, 1));
-    const needed = Math.max(adjusted - credit, 0);
+    const rawPct = daysMissed / qDays;
 
-    baseQH.textContent = decimalToHHMM(base);
-    adjustedQH.textContent = decimalToHHMM(adjusted);
-    totalCredit.textContent = decimalToHHMM(credit);
-    hoursNeeded.textContent = decimalToHHMM(needed);
+        // ✅ ALWAYS round UP to next whole percent
+        const pctWhole = Math.ceil(rawPct * 100);
+
+        // Convert back to decimal for math
+        const pctDecimal = pctWhole / 100;
+
+        // Cap at 100%
+        const cappedPct = Math.min(pctDecimal, 1);
+
+        // ✅ Calculations
+        const creditMissedVal = base * cappedPct;
+        const adjusted = base * (1 - cappedPct);
+        const needed = Math.max(adjusted - credit, 0);
+
+        // ✅ Display
+        baseQH.textContent = decimalToHHMM(base);
+        adjustedQH.textContent = decimalToHHMM(adjusted);
+        totalCredit.textContent = decimalToHHMM(credit);
+        hoursNeeded.textContent = decimalToHHMM(needed);
+
+        // ✅ NEW DISPLAY FIELDS
+        document.getElementById("missedPct").textContent = pctWhole + "%";
+        document.getElementById("creditMissed").textContent = decimalToHHMM(creditMissedVal);
+
 }
 
 function resetForm() {
