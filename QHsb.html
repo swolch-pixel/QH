@@ -449,23 +449,18 @@ function generateEmail() {
   const daysMissed = document.getElementById("daysMissed").value || "0";
   const lastProcessedDate = document.getElementById("lastCrewPayDate").value || "[DATE]";
 
-  // Quarter end date
   const q = Number(document.getElementById("quarterSelect").value);
   const year = new Date().getFullYear();
   const quarterEndMonth = (q * 3) + 2;
   const lastDay = new Date(year, quarterEndMonth + 1, 0).toLocaleDateString();
 
   const email = `
-
-<!-- HEADER -->
 <div style="background-color:#00bcd4; padding:6px; font-weight:600;">
 To: Flight Attendant<br>
 bcc: Bryn Krueger and Chelsea Ben-Meir<br>
 Subject: ${faName} / ${empNum} / ${qText} / Quarterly Hours Follow Up<br>
 Attachments: none
 </div>
-
-<br>
 
 <p>Hello ${faName},</p>
 
