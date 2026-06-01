@@ -383,7 +383,7 @@ function calculate() {
 
     const qDays = setupQuarter();
     const rawPct = daysMissed / qDays;
-    const roundedPct = Math.round(rawPct * 100) / 100;
+    const roundedPct = Math.ceil(rawPct * 100) / 100;
     const creditMissedVal = base * roundedPct;
     const adjusted = base * (1 - Math.min(roundedPct, 1));
     const needed = Math.max(adjusted - credit, 0);
@@ -392,7 +392,7 @@ function calculate() {
     adjustedQH.textContent = decimalToHHMM(adjusted);
     totalCredit.textContent = decimalToHHMM(credit);
     hoursNeeded.textContent = decimalToHHMM(needed);
-    missedPct.textContent = Math.round(roundedPct * 100) + "%";
+    missedPct.textContent = Math.ceil(rawPct * 100) + "%";
     creditMissed.textContent = decimalToHHMM(creditMissedVal);
 }
 
