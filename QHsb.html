@@ -173,6 +173,29 @@ email-preview {
   margin-left: 20px;
 }
 
+.email-section {
+  margin-top: 20px;
+}
+
+.email-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.copy-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.copy-btn:hover {
+  background-color: #005fa3;
+}
 
 </style>
 </head>
@@ -303,15 +326,21 @@ email-preview {
     <p>Hours Still Needed: <span id="hoursNeeded"></span></p>
 </div>
 
-<div class="email-preview">
-  <label>Email Draft (Use the Copy Button at the Bottom)</label>
-  <div id="emailDraft" class="email-draft" contenteditable="false"></div>
+
+<div class="email-section">
+  <div class="email-header">
+    <h3>Email Draft (Use the Copy Button — highlights turn pale yellow copied manually)</h3>
+
+    <button type="button" onclick="copyAndOpenMessage()" class="copy-btn">
+      Copy
+    </button>
+  </div>
+
+  <div id="emailDraft"></div>
 </div>
 
+
 <div class="row">
-<div class="actions">
-    <button type="button" onclick="copyAndOpenMessage()">Copy</button>
-</div>
 
 <div class="actions">
     <button type="button" onclick="saveQH()">Save</button>
@@ -481,16 +510,16 @@ const fullFormattedName = lastName
   const email = `
 
 <p>
-<i><strong><span style="background-color:cyan;">
-Update the <span style=background-color:yellow>yellow</span> highlighted information<br>
+<i><strong><mark style="background-color:cyan;">
+Update the <mark style=background-color:yellow>yellow</mark> highlighted information<br>
 Delete and unnecessary brackets "[]"<br>
-Delete blue highlighted information</strong></span>
+Delete blue highlighted information</strong></mark>
     <br>
     <br>
-<strong><span style="background-color:cyan;">To: Flight Attendant<br>
-<span style=background-color:yellow>bcc: Bryn Krueger and Chelsea Ben-Meir<br></span>
+<strong><mark style="background-color:cyan;">To: Flight Attendant<br>
+<mark style="background-color:yellow">bcc: Bryn Krueger and Chelsea Ben-Meir<br></mark>
 Subject: ${fullFormattedName} / ${empNum} / ${qText} / Quarterly Hours Follow Up<br>
-Attachments: none</span></strong></i>
+Attachments: none</mark></strong></i>
 </p>
 
 
@@ -519,7 +548,7 @@ Your trip credit has been processed through <strong>${lastProcessedDate}</strong
 </p>
 
 <p>
-Your total time missed due to [<span style="background-color:yellow;">LOA, BVNP, JURY, OJI, MIL, MLC, ANP</span>] is 
+Your total time missed due to [<mark style="background-color:yellow;">LOA, BVNP, JURY, OJI, MIL, MLC, ANP</mark>] is 
 <strong>${daysMissed} day(s)</strong>. You are not required to make up these hours.
 </p>
 
