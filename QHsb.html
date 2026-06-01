@@ -310,11 +310,12 @@ email-preview {
 
 <div class="row">
 <div class="actions">
- <button type="button" onclick="saveQH()">
-  Save
- </button>
+    <button type="button" onclick="copyAndOpenMessage()">Copy + Open Message</button>
 </div>
 
+<div class="actions">
+    <button type="button" onclick="saveQH()">Save</button>
+</div>
 
 <div class="actions">
     <button type="button" onclick="resetForm()">Reset</button>
@@ -428,7 +429,19 @@ function resetForm() {
 }
 
 function generateEmail() {
-  const faName = document.getElementById("faName").value || "Flight Attendant";
+  const rawName = document.getElementById("faName").value || "";
+const fullName = rawName.trim() || "Flight Attendant";
+
+// ✅ Split into parts safely
+const nameParts = fullName.split(/\s+/);
+
+const firstName = nameParts[0] || "Flight";
+const lastName = nameParts.length > 1 ? nameParts.slice(1).join("") : "";
+
+// ✅ Rebuild full name safely
+const fullFormattedName = lastName
+  ? `${firstName} ${lastName}`
+  : firstName;
   const empNum = document.getElementById("employeeNumber").value || "EMP #";
 
   const qText = document.getElementById("quarterInfo").textContent;
@@ -447,7 +460,18 @@ function generateEmail() {
   const hoursNeeded = document.getElementById("hoursNeeded").textContent;
 
   const daysMissed = document.getElementById("daysMissed").value || "0";
-  const lastProcessedDate = document.getElementById("lastCrewPayDate").value || "[DATE]";
+  const rawDate = document.getElementById("lastCrewPayDate").value;
+
+    let lastProcessedDate = "[DATE]";
+    if (rawDate) {
+    const parts = rawDate.split("-");
+    const year = parts[0];
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
+
+    lastProcessedDate = `${month}/${day}/${year}`;
+}
+
 
   const q = Number(document.getElementById("quarterSelect").value);
   const year = new Date().getFullYear();
@@ -455,14 +479,22 @@ function generateEmail() {
   const lastDay = new Date(year, quarterEndMonth + 1, 0).toLocaleDateString();
 
   const email = `
-<div style="background-color:#00bcd4; padding:6px; font-weight:600;">
-To: Flight Attendant<br>
-bcc: Bryn Krueger and Chelsea Ben-Meir<br>
-Subject: ${faName} / ${empNum} / ${qText} / Quarterly Hours Follow Up<br>
-Attachments: none
-</div>
 
-<p>Hello ${faName},</p>
+<p>
+<i><strong><span style="background-color:cyan;">
+Update the <span style=background-color:yellow>yellow</span> highlighted information<br>
+Delete and unnecessary brackets "[]"<br>
+Delete blue highlighted information</strong></span>
+    <br>
+    <br>
+<strong><span style="background-color:cyan;">To: Flight Attendant<br>
+bcc: Bryn Krueger and Chelsea Ben-Meir<br>
+Subject: ${fullFormattedName} / ${empNum} / ${qText} / Quarterly Hours Follow Up<br>
+Attachments: none</span></strong></i>
+</p>
+
+
+<p>Hello ${firstName},</p>
 
 <p>
 Thank you for contacting the InFlight Support Center regarding your Quarterly Hours. Below is a recap of your hour requirement for this quarter.
@@ -473,9 +505,9 @@ Thank you for contacting the InFlight Support Center regarding your Quarterly Ho
 <p><strong>Your credit hours processed as of today are:</strong></p>
 
 <p>
-${m1}: ${m1Val}<br>
-${m2}: ${m2Val}<br>
-${m3}: ${m3Val}
+<strong>${m1}:</strong> ${m1Val}<br>
+<strong>${m2}:</strong> ${m2Val}<br>
+<strong>${m3}:</strong> ${m3Val}
 </p>
 
 <p>
@@ -487,7 +519,7 @@ Your trip credit has been processed through <strong>${lastProcessedDate}</strong
 </p>
 
 <p>
-Your total time missed due to LOA, BVNP, JURY, OJI, MIL, MLC, ANP is 
+Your total time missed due to [<span style="background-color:yellow;">LOA, BVNP, JURY, OJI, MIL, MLC, ANP</span>] is 
 <strong>${daysMissed} day(s)</strong>. You are not required to make up these hours.
 </p>
 
@@ -500,25 +532,25 @@ Your adjusted hour requirement for this quarter is: <strong>${adjustedQH}</stron
 </p>
 
 <p>
-<strong>Note:</strong> These calculations are subject to change. If your LOA dates change and/or are adjusted, these numbers may no longer be applicable. Please contact the ISC to have your hours recalculated.
+<strong>Note: These calculations are subject to change. </strong> If your LOA dates change and/or are adjusted, these numbers may no longer be applicable. Please contact the ISC to have your hours recalculated.
 </p>
 
-<p>
+<p></strong>
 This calculation does not include any future trip credit currently on your schedule, or unprocessed trip credit for trips you have worked. If you drop or pick up trips before the end of the quarter, please ensure your total trip credit meets or exceeds the above amount.
-</p>
+</strong></p>
 
 <p>
-Your Processed Credit is always available for review on SkedPlus+ under the Crew Pay tab.
+Your <strong>Processed Credit</strong> is always available for review on <a href="https://www.skywestonline.com/SKYW/SkedPlus/MySchedule.aspx?Notify=Y">SkedPlus+</a> under the <a href="https://www.skywestonline.com/SKYW/CrewMisc/CrewPayReport.aspx">Crew Pay</a> tab.
 </p>
 
 <ul>
-<li>To determine previous trip credit in the Crew Pay tab, refer to <strong>Processed Credit</strong> (not Assigned Credit or Projected Credit).</li>
-<li>To determine credit for future assignments in the Crew Pay tab, refer to <strong>Assigned Credit</strong> (not Projected Credit).</li>
+<li>To determine <strong>previous</strong> trip credit in the <a href="https://www.skywestonline.com/SKYW/CrewMisc/CrewPayReport.aspx">Crew Pay</a> tab, refer to <strong>Processed Credit</strong> (not Assigned Credit or Projected Credit).</li>
+<li>To determine credit for strong>future</strong> assignments in the <a href="https://www.skywestonline.com/SKYW/CrewMisc/CrewPayReport.aspx">Crew Pay</a> tab, refer to <strong>Assigned Credit</strong> (not Projected Credit).</li>
 </ul>
 
 <p>
-For more information about your hourly requirement, you can reference the Flight Attendant Policy Manual (FAPM):<br>
-SWOL &gt; Info Center &gt; Documents &gt; Manuals (IF) &gt; Flight Attendant Policy Manual &gt; <strong>SP2316 Hours of Service</strong>
+For more information about your hourly requirement, you can reference the <strong><a href="https://www.skywestonline.com/menudocs/+if.manuals/flight%20attendant%20policy%20manual/sp-fapm.pdf">Flight Attendant Policy Manual (FAPM)</a>:
+SWOL &gt; Info Center &gt; Documents &gt; Manuals (IF) &gt; Flight Attendant Policy Manual &gt; <a href="https://www.skywestonline.com/menudocs/+if.manuals/flight%20attendant%20policy%20manual/sp2316.pdf">SP2316 Hours of Service</a></strong>
 </p>
 
 <p>
@@ -546,10 +578,15 @@ const empNum =
     ?.replace(/[^0-9]/g, "")
     || "EMP";
 
-const faName =
-  document.getElementById("faName").value
-    ?.trim()
-    || "Name";
+const fullName = document.getElementById("faName").value.trim() || "Flight Attendant";
+
+// Split into parts
+const nameParts = fullName.split(" ");
+const firstName = nameParts[0] || "Flight";
+const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+
+// Rebuild full formatted name (handles single-name case)
+const fullFormattedName = lastName ? `${firstName} ${lastName}` : firstName;
 
 const quarterText = document.getElementById("quarterInfo").textContent;
 
@@ -653,6 +690,50 @@ document.querySelectorAll("input, select").forEach(e =>
     generateEmail();
   })
 );
+
+async function copyAndOpenMessage() {
+  const emailDiv = document.getElementById("emailDraft");
+  const empNum = document.getElementById("employeeNumber").value;
+
+  const htmlContent = emailDiv.innerHTML;
+  const plainText = emailDiv.innerText;
+
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      const item = new ClipboardItem({
+        "text/html": new Blob([htmlContent], { type: "text/html" }),
+        "text/plain": new Blob([plainText], { type: "text/plain" })
+      });
+
+      await navigator.clipboard.write([item]);
+    } else {
+      await navigator.clipboard.writeText(plainText);
+    }
+
+    // ✅ SHOW POP-UP INSTRUCTIONS
+    alert(
+`✅ Email copied!
+
+Next steps:
+1. The message window will open
+2. Click inside the message body
+3. Press Ctrl + V (Paste)
+4. Review and Send`
+    );
+
+  } catch (err) {
+    console.error("Copy failed:", err);
+    alert("Copy failed — please copy manually.");
+    return;
+  }
+
+  if (empNum) {
+    const url = `https://www.skywestonline.com/oo/mymessages/compose?to=${empNum}`;
+    window.open(url, "_blank");
+  } else {
+    alert("Employee number missing — cannot open message.");
+  }
+}
 
 </script>
 
