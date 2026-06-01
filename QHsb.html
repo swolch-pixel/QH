@@ -429,7 +429,9 @@ function resetForm() {
 
 function generateEmail() {
   const faName = document.getElementById("faName").value || "Flight Attendant";
-  const qText = document.getElementById("quarterInfo").textContent;
+  const empNum = document.getElementById("employeeNumber").value || "EMP #";
+
+  const qText = document.getElementById("quarterInfo").textContent; // "Q2 2026"
   const today = new Date().toLocaleDateString();
 
   const m1 = document.getElementById("m1Label").textContent;
@@ -443,63 +445,67 @@ function generateEmail() {
   const totalCredit = document.getElementById("totalCredit").textContent;
   const adjustedQH = document.getElementById("adjustedQH").textContent;
   const hoursNeeded = document.getElementById("hoursNeeded").textContent;
-  const daysMissed = document.getElementById("daysMissed").value || 0;
 
- const email = `
-<p>Hello ${faName},</p>
+  const daysMissed = document.getElementById("daysMissed").value || "0";
+  const lastProcessedDate = document.getElementById("lastCrewPayDate").value || "[DATE]";
 
-<p>
-Thank you for contacting the <strong>InFlight Support Center</strong> regarding your Quarterly Hours.
-Below is a recap of your hour requirement for this quarter.
-</p>
+  // Calculate last day of quarter
+  const q = Number(document.getElementById("quarterSelect").value);
+  const year = new Date().getFullYear();
+  const quarterEndMonth = (q * 3) + 2;
+  const lastDay = new Date(year, quarterEndMonth + 1, 0).toLocaleDateString();
 
-<p><strong>Quarter:</strong> ${qText}</p>
+  const email = `
 
-<p><strong>Your credit hours processed as of today:</strong></p>
+To: Flight Attendant
+bcc: Bryn Krueger and Chelsea Ben-Meir
+Subject: ${faName} / ${empNum} / ${qText} / Quarterly Hours Follow Up
+Attachments: none
 
-<ul>
-  <li>${m1}: ${m1Val}</li>
-  <li>${m2}: ${m2Val}</li>
-  <li>${m3}: ${m3Val}</li>
-</ul>
+Hello ${faName},
 
-<p>
-<strong>Total Hours Processed as of ${today}:</strong> ${totalCredit}
-</p>
+Thank you for contacting the InFlight Support Center regarding your Quarterly Hours. Below is a recap of your hour requirement for this quarter.
 
-<p>
-Your total time missed due to LOA, BVNP, JURY, or OJI is <strong>${daysMissed}</strong> day(s).
-You are not required to make up these hours.
-</p>
+Quarter ${qText}
 
-<p>
-<strong>Your adjusted hour requirement:</strong> ${adjustedQH}
-</p>
+Your credit hours processed as of today are:
 
-<p>
-<strong>Additional hours needed by the end of the quarter:</strong> ${hoursNeeded}
-</p>
+${m1}: ${m1Val}
+${m2}: ${m2Val}
+${m3}: ${m3Val}
 
-<p>
-Your Processed Credit is available in
-<a href="https://www.skywestonline.com/SKYW/SkedPlus/MySchedule.aspx" target="_blank">SkedPlus+</a>
-under the
-<a href="https://www.skywestonline.com/SKYW/CrewMisc/CrewPayReport.aspx" target="_blank">Crew Pay</a> tab.
-</p>
+Your trip credit has been processed through ${lastProcessedDate}
 
-<p>
-For policy reference: Flight Attendant Policy Manual &gt <a href="https://www.skywestonline.com/menudocs/+if.manuals/flight%20attendant%20policy%20manual/sp2316.pdf"><strong>SP2316 Hours of Service</strong></a>
-</p>
+Total Hours Processed as of ${today}: ${totalCredit}
 
-<p>
-If you have any additional questions, feel free to reach out.
-</p>
+Your total time missed due to LOA, BVNP, JURY, OJI, etc. is ${daysMissed} day(s). You are not required to make up these hours.
 
+Your adjusted hour requirement for this quarter is: ${adjustedQH}
+
+Additional Hours Needed By: ${lastDay} is ${hoursNeeded}.
+
+Note: These calculations are subject to change. If your LOA dates change and/or are adjusted, these numbers may no longer be applicable. Please contact the ISC to have your hours recalculated.
+
+This calculation does not include any future trip credit currently on your schedule, or unprocessed trip credit for trips you have worked. If you drop or pick up trips before the end of the quarter, please ensure your total trip credit meets or exceeds the above amount.
+
+Your Processed Credit is always available for review on SkedPlus+ under the Crew Pay tab.
+
+• To determine previous trip credit in the Crew Pay tab, refer to Processed Credit (not Assigned Credit or Projected Credit).
+• To determine credit for future assignments in the Crew Pay tab, refer to Assigned Credit (not Projected Credit).
+
+For more information about your hourly requirement, you can reference the Flight Attendant Policy Manual (FAPM):
+SWOL > Info Center > Documents > Manuals (IF) > Flight Attendant Policy Manual > SP2316 Hours of Service
+
+As we approach the end of the quarter, I wanted to remind you that if you find yourself needing additional hours to meet your quarterly requirement, please take action.
+
+Please email your domicile-specific Crew Pay Coordinator clearly stating the number of user hours and/or vacation hours needed to meet your quarterly hours.
+
+Please reach out if you have any additional questions.
 `;
-``
 
-  document.getElementById("emailDraft").innerHTML = email;
+  document.getElementById("emailDraft").innerText = email;
 }
+
 
 setDefaultQuarter();
 calculate();
