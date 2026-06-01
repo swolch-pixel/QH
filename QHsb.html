@@ -154,15 +154,17 @@ email-preview {
 }
 
 
+
 .email-draft {
-  border: 1px solid #bbb;
-  border-radius: 5px;
-  padding: 12px;
-  background: #fafafa;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  padding: 16px;
+  background: #f7f9fc;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   font-family: "Segoe UI", Arial, sans-serif;
   line-height: 1.5;
-  white-space: normal;
 }
+
 
 .email-draft a {
   color: #003a8f;
@@ -329,14 +331,14 @@ email-preview {
 
 <div class="email-section">
   <div class="email-header">
-    <h3>Email Draft (Use the Copy Button — highlights turn pale yellow if copied manually)</h3>
+    <h3>Email Draft (Use the Copy Button — highlights turn pale yellow copied manually)</h3>
 
     <button type="button" onclick="copyAndOpenMessage()" class="copy-btn">
       Copy
     </button>
   </div>
 
-  <div id="emailDraft"></div>
+  <div id="emailDraft" class="email-draft"></div>
 </div>
 
 
@@ -373,12 +375,29 @@ function decimalToHHMM(decimal) {
 }
 
 function hhmmToDecimal(value) {
-    if (!value || !value.includes(":")) return 0;
+  if (!value) return 0;
+
+  value = value.trim();
+
+  // ✅ Case 1: HH:MM format
+  if (value.includes(":")) {
     const [h, m] = value.split(":").map(Number);
     if (isNaN(h) || isNaN(m)) return 0;
     return h + m / 60;
-}
+  }
 
+  // ✅ Case 2: Whole hours (e.g., "5")
+  if (!isNaN(value)) {
+    return Number(value);
+  }
+
+  // ✅ Case 3: Decimal hours (e.g., "5.5")
+  if (!isNaN(parseFloat(value))) {
+    return parseFloat(value);
+  }
+
+  return 0;
+}
 function setDefaultQuarter() {
     const q = Math.floor(new Date().getMonth() / 3);
     document.getElementById("quarterSelect").value = q;
@@ -455,7 +474,6 @@ function resetForm() {
     status.value = "FT";
     setDefaultQuarter();
     calculate();
-    generateEmail();
 }
 
 function generateEmail() {
@@ -713,7 +731,54 @@ function saveQH() {
 
 setDefaultQuarter();
 calculate();
+generateEmail();
 
+// ✅ Format while typing (530 → 5:30, ignore :)
+function formatTimeInput(input) {
+  let value = input.value;
+
+  // Remove anything that isn't a number
+  value = value.split("").filter(c => "0123456789".includes(c)).join("");
+
+  if (value.length === 0) {
+    input.value = "";
+    return;
+  }
+
+  // Allow simple hours like 5 or 10 while typing
+  if (value.length <= 2) {
+    input.value = value;
+    return;
+  }
+
+  // Insert colon for 3+ digits
+  const hours = value.slice(0, -2);
+  const minutes = value.slice(-2);
+  input.value = hours + ":" + minutes;
+}
+
+// ✅ Final cleanup when leaving field (5 → 5:00)
+function normalizeTimeInput(input) {
+  let value = input.value.trim();
+
+  if (!value) return;
+
+  if (value.includes(":")) {
+    const [h, m] = value.split(":").map(Number);
+    if (!isNaN(h) && !isNaN(m)) {
+      const minutes = Math.min(m, 59);
+      input.value = h + ":" + minutes.toString().padStart(2, "0");
+    }
+    return;
+  }
+
+  // Convert plain number → hh:00
+  if (!isNaN(value)) {
+    input.value = Number(value) + ":00";
+  }
+}
+
+// ✅ Existing live update for calculations + email
 document.querySelectorAll("input, select").forEach(e =>
   e.addEventListener("input", () => {
     calculate();
@@ -721,10 +786,32 @@ document.querySelectorAll("input, select").forEach(e =>
   })
 );
 
+// ✅ Apply time formatting to month fields
+["m1", "m2", "m3"].forEach(id => {
+  const input = document.getElementById(id);
+
+  input.addEventListener("input", () => {
+    formatTimeInput(input);
+  });
+
+  input.addEventListener("blur", () => {
+    normalizeTimeInput(input);
+    calculate();
+    generateEmail();
+  });
+});
+
+// ✅ Warn if user manually copies the draft
+document.getElementById("emailDraft").addEventListener("copy", function () {
+  setTimeout(() => {
+    alert("⚠️ Formatting may be lost. Please use the Copy button at the top of the draft email.");
+  }, 10);
+});
+
+// ✅ Copy + open message
 async function copyAndOpenMessage() {
   const emailDiv = document.getElementById("emailDraft");
   const empNum = document.getElementById("employeeNumber").value;
-
   const htmlContent = emailDiv.innerHTML;
   const plainText = emailDiv.innerText;
 
@@ -734,23 +821,18 @@ async function copyAndOpenMessage() {
         "text/html": new Blob([htmlContent], { type: "text/html" }),
         "text/plain": new Blob([plainText], { type: "text/plain" })
       });
-
       await navigator.clipboard.write([item]);
     } else {
       await navigator.clipboard.writeText(plainText);
     }
 
-    // ✅ SHOW POP-UP INSTRUCTIONS
-    alert(
-`✅ Email copied!
+    alert(`✅ Email copied!
 
 Next steps:
 1. The message window will open
 2. Click inside the message body
 3. Press Ctrl + V (Paste)
-4. Review and Send`
-    );
-
+4. Review and Send`);
   } catch (err) {
     console.error("Copy failed:", err);
     alert("Copy failed — please copy manually.");
