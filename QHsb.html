@@ -186,17 +186,36 @@ email-preview {
 }
 
 .copy-btn {
-  background-color: #28a745;
+  background: linear-gradient(135deg, #28a745, #34d058);
   color: white;
   border: none;
-  padding: 8px 14px;
-  border-radius: 4px;
+  padding: 10px 18px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
+  transition: all 0.2s ease;
+  animation: pulseGlow 2s infinite;
 }
 
 .copy-btn:hover {
-  background-color: #005fa3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(135deg, #218838, #2ecc71);
+}
+
+/* ✅ Subtle pulsing glow */
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 6px rgba(40, 167, 69, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(40, 167, 69, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 6px rgba(40, 167, 69, 0.5);
+  }
 }
 
 </style>
@@ -331,7 +350,7 @@ email-preview {
 
 <div class="email-section">
   <div class="email-header">
-    <h3>Email Draft (Use the Copy Button — highlights turn pale yellow copied manually)</h3>
+    <h3>Email Draft (Use the Copy Button — highlights turn pale yellow if copied manually)</h3>
 
     <button type="button" onclick="copyAndOpenMessage()" class="copy-btn">
       Copy
