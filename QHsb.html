@@ -278,7 +278,7 @@ email-preview {
 <div>
   <label>
     Processed Credit
-    <a href="https://www.skywestonline.com/SKYW/CrewMisc/CrewPayReport.aspx" target="">Crew Pay</a>
+    <a href="https://www.skywestonline.com/SKYW/CrewMisc/CrewPayReport.aspx" target="_blank">Crew Pay</a>
   </label>
 
   <div class="month-stack">
@@ -305,7 +305,7 @@ email-preview {
   <div>
     <label>
       Total Days Missed Due to Leave
-      <a href="https://www.skywestonline.com/SKYW/SkedPlus/Impersonate.aspx" target="">SkedPlus+ Impersonate</a>
+      <a href="https://www.skywestonline.com/SKYW/SkedPlus/Impersonate.aspx" target="_blank">SkedPlus+ Impersonate</a>
     </label>
     <input type="number" id="daysMissed" min="0">
   </div>
@@ -733,6 +733,11 @@ setDefaultQuarter();
 calculate();
 generateEmail();
 
+["m1", "m2", "m3"].forEach(id => {
+  document.getElementById(id).value = "0:00";
+});
+
+
 // ✅ Format while typing (530 → 5:30, ignore :)
 function formatTimeInput(input) {
   let value = input.value;
@@ -786,6 +791,14 @@ document.querySelectorAll("input, select").forEach(e =>
   })
 );
 
+// ✅ Force daysMissed to whole numbers only
+document.getElementById("daysMissed").addEventListener("input", function () {
+  if (this.value.includes(".")) {
+    this.value = Math.floor(this.value);
+  }
+});
+
+
 // ✅ Apply time formatting to month fields
 ["m1", "m2", "m3"].forEach(id => {
   const input = document.getElementById(id);
@@ -795,10 +808,31 @@ document.querySelectorAll("input, select").forEach(e =>
   });
 
   input.addEventListener("blur", () => {
-    normalizeTimeInput(input);
-    calculate();
-    generateEmail();
-  });
+  const value = input.value.trim();
+
+  if (value) {
+    if (value.includes(":")) {
+      const [h, m] = value.split(":").map(Number);
+
+      if (isNaN(h) || isNaN(m) || m > 59) {
+        input.style.border = "2px solid red";
+      } else {
+        input.style.border = "";
+      }
+    } else if (isNaN(value)) {
+      input.style.border = "2px solid red";
+    } else {
+      input.style.border = "";
+    }
+  } else {
+    input.style.border = "";
+  }
+
+  // ✅ keep your existing behavior
+  normalizeTimeInput(input);
+  calculate();
+  generateEmail();
+});
 });
 
 // ✅ Warn if user manually copies the draft
@@ -808,12 +842,80 @@ document.getElementById("emailDraft").addEventListener("copy", function () {
   }, 10);
 });
 
+function showToast(message, isError = false) {
+  const oldToast = document.getElementById("copyToast");
+  if (oldToast) oldToast.remove();
+
+  const toast = document.createElement("div");
+  toast.id = "copyToast";
+  toast.textContent = message;
+
+  toast.style.position = "fixed";
+  toast.style.bottom = "20px";
+  toast.style.right = "20px";
+  toast.style.zIndex = "9999";
+  toast.style.background = isError ? "#b00020" : "#28a745";
+  toast.style.color = "white";
+  toast.style.padding = "10px 14px";
+  toast.style.borderRadius = "6px";
+  toast.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
+  toast.style.fontFamily = '"Segoe UI", Arial, sans-serif';
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    if (toast.parentNode) toast.remove();
+  }, 2500);
+}
+
 // ✅ Copy + open message
 async function copyAndOpenMessage() {
   const emailDiv = document.getElementById("emailDraft");
   const empNum = document.getElementById("employeeNumber").value;
   const htmlContent = emailDiv.innerHTML;
   const plainText = emailDiv.innerText;
+  const faName = document.getElementById("faName").value.trim();
+  const calcBy = document.getElementById("calculatedBy").value;
+  const yos = document.getElementById("yos").value;
+  const status = document.getElementById("status").value;
+
+// Reset borders
+["faName", "employeeNumber", "calculatedBy", "yos", "status"].forEach(id => {
+  document.getElementById(id).style.border = "";
+});
+
+let hasError = false;
+
+if (!faName) {
+  document.getElementById("faName").style.border = "2px solid red";
+  hasError = true;
+}
+
+if (!empNum) {
+  document.getElementById("employeeNumber").style.border = "2px solid red";
+  hasError = true;
+}
+
+if (!calcBy) {
+  document.getElementById("calculatedBy").style.border = "2px solid red";
+  hasError = true;
+}
+
+if (!yos) {
+  document.getElementById("yos").style.border = "2px solid red";
+  hasError = true;
+}
+
+if (!status) {
+  document.getElementById("status").style.border = "2px solid red";
+  hasError = true;
+}
+
+if (hasError) {
+  alert("⚠️ Please complete all required fields before sending.");
+  return;
+}
+``
 
   try {
     if (navigator.clipboard && window.ClipboardItem) {
@@ -826,13 +928,8 @@ async function copyAndOpenMessage() {
       await navigator.clipboard.writeText(plainText);
     }
 
-    alert(`✅ Email copied!
+  showToast("Email copied. Click in the message body and press Ctrl + V.");
 
-Next steps:
-1. The message window will open
-2. Click inside the message body
-3. Press Ctrl + V (Paste)
-4. Review and Send`);
   } catch (err) {
     console.error("Copy failed:", err);
     alert("Copy failed — please copy manually.");
