@@ -566,14 +566,21 @@ Your trip credit has been processed through <strong>${lastProcessedDate}</strong
 <strong>Total Hours Processed as of ${today}: ${totalCredit}</strong>
 </p>
 
+${Number(daysMissed) > 0 ? `
 <p>
-Your total time missed due to [<mark style="background-color:yellow;">LOA, BVNP, JURY, OJI, MIL, MLC, ANP</mark>] is 
+Your total time missed due to [<mark style="background-color:yellow;">LOA, BVNP, JURY, OJI, MIL, MLC, ANP</mark>] is
 <strong>${daysMissed} day(s)</strong>. You are not required to make up these hours.
 </p>
 
 <p>
 Your adjusted hour requirement for this quarter is: <strong>${adjustedQH}</strong>
 </p>
+` : `
+<p>
+Your quarter requirement is: <strong>${adjustedQH}</strong>
+</p>
+`}
+
 
 <p>
 <strong>Additional Hours Needed By: ${lastDay} is ${hoursNeeded}</strong>
@@ -800,40 +807,26 @@ document.getElementById("daysMissed").addEventListener("input", function () {
 
 
 // ✅ Apply time formatting to month fields
+
 ["m1", "m2", "m3"].forEach(id => {
   const input = document.getElementById(id);
+
+  // ✅ Highlight everything when entering field
+  input.addEventListener("focus", () => {
+    input.select();
+  });
 
   input.addEventListener("input", () => {
     formatTimeInput(input);
   });
 
   input.addEventListener("blur", () => {
-  const value = input.value.trim();
-
-  if (value) {
-    if (value.includes(":")) {
-      const [h, m] = value.split(":").map(Number);
-
-      if (isNaN(h) || isNaN(m) || m > 59) {
-        input.style.border = "2px solid red";
-      } else {
-        input.style.border = "";
-      }
-    } else if (isNaN(value)) {
-      input.style.border = "2px solid red";
-    } else {
-      input.style.border = "";
-    }
-  } else {
-    input.style.border = "";
-  }
-
-  // ✅ keep your existing behavior
-  normalizeTimeInput(input);
-  calculate();
-  generateEmail();
+    normalizeTimeInput(input);
+    calculate();
+    generateEmail();
+  });
 });
-});
+
 
 // ✅ Warn if user manually copies the draft
 document.getElementById("emailDraft").addEventListener("copy", function () {
