@@ -334,7 +334,7 @@ email-preview {
     <h3>Email Draft</h3>
 
     <button type="button" onclick="saveAndCopy()" class="copy-btn">
-  Save & Copy
+  Save & Open Email
 </button>
   </div>
 
@@ -674,7 +674,7 @@ function saveQH() {
   // ----- Gather values from the form -----
   const empNum = (document.getElementById("employeeNumber")?.value || "").replace(/[^0-9]/g, "") || "EMP";
   const faNameRaw = (document.getElementById("faName")?.value || "").trim() || "Name";
-  const faNameSafe = faNameRaw.replace(/\s+/g, "_");
+  const faNameSafe = faNameRaw.trim();
 
   const quarterText = document.getElementById("quarterInfo")?.textContent || ""; // e.g. "Q2 2026"
   const match = quarterText.match(/Q([1-4])\s+(\d{4})/);
@@ -686,6 +686,9 @@ function saveQH() {
 
   // "Calculated By" value (who processed it)
   const processedBy = document.getElementById("calculatedBy")?.value || "";
+  const yos = document.getElementById("yos")?.value ?? "";
+  const status = document.getElementById("status")?.value ?? "";
+  const baseQH = document.getElementById("baseQH")?.textContent ?? ""
 
   // Email text (the version to send to the FA) — keep this CLEAN
   // emailDraft is a DIV in your newer version, so use innerText.
@@ -694,12 +697,15 @@ function saveQH() {
   // ----- Build FILE content (adds header NOT shown in email) -----
   const now = new Date();
   const header =
-    `Processed By: ${processedBy || "Not specified"}\n` +
-    `Processed On: ${now.toLocaleString()}\n` +
-    `Employee #: ${empNum}\n` +
-    `FA Name: ${faNameRaw}\n` +
-    `Quarter: ${quarterText}\n` +
-    `----------------------------------------\n\n`;
+  `Processed By: ${processedBy ?? "Not specified"}\n` +
+  `Processed On: ${now.toLocaleString()}\n` +
+  `Employee #: ${empNum}\n` +
+  `FA Name: ${faNameRaw}\n` +
+  `Quarter: ${quarterText}\n` +
+  `YOS: ${yos}\n` +
+  `Status: ${status === "FT" ? "Full-Time" : "Part-Time"}\n` +
+  `Base QH Requirement: ${baseQH}\n` +
+  `----------------------------------------\n\n`;
 
   const fileContent = header + emailText;
 
@@ -727,12 +733,10 @@ function saveQH() {
   })
   .then(() => {
     if (statusEl) statusEl.textContent = `Saved: ${fileName}`;
-    alert("Saved successfully to SharePoint.");
   })
   .catch((err) => {
     console.error("Save failed:", err);
     if (statusEl) statusEl.textContent = "Save failed (see console / run history).";
-    alert("Save failed — check Power Automate run history.");
   });
 }
 
@@ -861,6 +865,40 @@ function showToast(message, isError = false) {
   }, 2500);
 }
 
+function validateRequiredFields() {
+  const faName = document.getElementById("faName").value.trim();
+  const empNum = document.getElementById("employeeNumber").value.trim();
+  const calcBy = document.getElementById("calculatedBy").value;
+
+  let hasError = false;
+
+  ["faName", "employeeNumber", "calculatedBy"].forEach(id => {
+    document.getElementById(id).style.border = "";
+  });
+
+  if (!faName) {
+    document.getElementById("faName").style.border = "2px solid red";
+    hasError = true;
+  }
+
+  if (!empNum) {
+    document.getElementById("employeeNumber").style.border = "2px solid red";
+    hasError = true;
+  }
+
+  if (!calcBy) {
+    document.getElementById("calculatedBy").style.border = "2px solid red";
+    hasError = true;
+  }
+
+  if (hasError) {
+    alert("⚠️ Please complete Name, Employee Number, and Calculated By before saving.");
+    return false;
+  }
+
+  return true;
+}
+
 function showSavedIndicator() {
   let existing = document.getElementById("savedIndicator");
 
@@ -884,16 +922,19 @@ function showSavedIndicator() {
   }
 }
 
+
 async function saveAndCopy() {
-  // ✅ Trigger save first
+  if (!validateRequiredFields()) return;
+
   saveQH();
 
-  // ✅ Then run your existing copy/open logic
-  copyAndOpenMessage();
+  const completed = await copyAndOpenMessage();
 
-  // ✅ Show persistent saved indicator
-  showSavedIndicator();
+  if (completed) {
+    resetForm();
+  }
 }
+
 
 // ✅ Copy + open message
 async function copyAndOpenMessage() {
@@ -942,7 +983,6 @@ if (hasError) {
   alert("⚠️ Please complete all required fields before sending.");
   return;
 }
-``
 
   try {
     if (navigator.clipboard && window.ClipboardItem) {
@@ -955,20 +995,38 @@ if (hasError) {
       await navigator.clipboard.writeText(plainText);
     }
 
-  showToast("Email copied. Click in the message body and press Ctrl + V.");
-
   } catch (err) {
     console.error("Copy failed:", err);
     alert("Copy failed — please copy manually.");
     return;
   }
 
-  if (empNum) {
-    const url = `https://www.skywestonline.com/oo/mymessages/compose?account=IFSUPP&to=${empNum}`;
-    window.open(url, "_blank", "noopener,noreferrer");
-  } else {
-    alert("Employee number missing — cannot open message.");
-  }
+// ✅ Only runs AFTER user clicks OK
+const proceed = confirm(
+  "✅ Saved successfully to SharePoint.\n\n" +
+  "Next Steps:\n\n" +
+  "1. Press Ctrl + V in the message body\n" +
+  "2. Review highlighted sections\n" +
+  "3. Send the message\n\n" +
+  "Click OK to continue or Cancel to go back and make changes."
+);
+
+// ❌ If they hit Cancel — STOP everything
+
+if (!proceed) {
+  return false;
+}
+
+
+// ✅ Only runs if they clicked OK
+if (empNum) {
+  const url = `https://www.skywestonline.com/oo/mymessages/compose?account=IFSUPP&to=${empNum}`;
+  window.open(url, "_blank", "noopener,noreferrer");
+} else {
+  alert("Employee number missing — cannot open message.");
+}
+return true;
+
 }
 
 </script>
